@@ -1,13 +1,15 @@
-import {Avatars, Client, OAuthProvider} from "react-native-appwrite";
+import {Account, Avatars, Client, OAuthProvider} from "react-native-appwrite";
 import * as Linking from "expo-linking";
 export const config = {
-    platform:'',
-    endpoint:'',
-    project:''
+      platform:process.env.EXPO_PUBLIC_APPWRITE_PLATFORM,
+      endpoint:process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
+      project:process.env.EXPO_PUBLIC_APPWRITE_PROJECTID
 }
 export const client = new Client();
 
-client.setEndpoint().setPlatform().setProject()
+        client.setEndpoint(config.endpoint!)
+        .setPlatform(config.platform!)
+        .setProject(config.project!);
 
 
 export const avatar = new Avatars(client);
@@ -15,14 +17,55 @@ export const account =  new Account(client);
 
 export async function login() {
     try{
-        const redirect = client.createURL(path:'/');
-        const response = await account.createOAUTH2Token((OAuthProvider.Google,redirect));
+        const redirect = Linking.createURL('/');
+        const response = await account.createOAuth2Token(OAuthProvider.Google,redirect);
 
         if(!response) throw new Error('failed to login');
         const browserResult = await openAuthSessionAsync(response.toString(),redirect);
+        if(browserResult.type !== 'success') throw new Error('Failed to get error');
+        const url = new URL(browserResult.url);
+        const secret = url.searchParams.get('secret')?.toString();
+        const userId = url.searchParams.get('userId')?.toString();
+        if(!secret || !userId) throw new Error('Failed to ');
+
+        const session = await account.createSession(userId,secret);
+        if(!session) throw new Error('Failed to create session');
+        return true;
     }
     catch(error){
         console.log(error);
         return false;
     }
+}
+export async function logout(){
+    try{
+        await account.deleteSession('current');
+        return true;
+    }
+    catch(error){
+        console.error(error);
+        return false;
+    }
+}
+export async function getUser(){
+    try{
+        const response = await account.get();
+        if(response.$id){
+            const userAvatar = avatar.getInitials(response.name);
+        
+        return {
+            ...response,
+            avatar:userAvatar.toString(),
+        }
+      }
+    }
+    catch(error){
+        console.log(error);
+        return null;
+    }
+}
+
+
+function openAuthSessionAsync(arg0: string, redirect: string) {
+    throw new Error("Function not implemented.");
 }
