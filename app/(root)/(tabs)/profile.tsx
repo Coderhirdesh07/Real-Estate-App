@@ -1,6 +1,25 @@
-import { View, Text, ScrollView, Image,TouchableOpacity } from 'react-native'
+import { View, Text, ScrollView, Image,TouchableOpacity, ImageSourcePropType } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
+interface SettingsItemProps{
+  icon?:ImageSourcePropType;
+  title:string;
+  onPress?:()=>void;
+  textStyle?:string;
+  showArrow?:boolean;
+}
+
+
+  const SettingsItem = ({icon,title,onPress,textStyle,showArrow=true}:SettingsItemProps)=>{
+    <TouchableOpacity onPress={onPress} className='flex flex-row items-center justify-between py-3'>
+      <View className='flex flex-row items-center gap-3'>
+        <Image source={icon} className='size-6'/>
+        <Text className={`text-lg font-thin text-black ${textStyle}`}>{title}</Text>
+      </View>
+      {showArrow && <Image source={} className='size-5'/>}
+    </TouchableOpacity>
+  }
 
 const Profile = () => {
   const handleLogout = async () => {}
@@ -17,11 +36,18 @@ const Profile = () => {
       <View className='flex-row justify-center flex mt-5'>
         <View className='flex flex-col items-center relative mt-5'>
           <Image source={} className='size-44 relative rounded-full'/>
+
           <TouchableOpacity className='absolute bottom-11 right-2'>
             <Image source={} className='size-9'/>
           </TouchableOpacity>
+
           <Text className='text-2xl'>Adrian | Hird</Text>
         </View>
+      </View>
+
+      <View className = 'flex flex-col mt-10'>
+      <SettingsItem title='My Booking'/>
+      <SettingsItem title='Payments'/>
       </View>
 
       </ScrollView>
@@ -29,4 +55,4 @@ const Profile = () => {
   )
 }
 
-export default Profile
+export default Profile;

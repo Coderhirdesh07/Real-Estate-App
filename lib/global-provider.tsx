@@ -1,6 +1,6 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext ,ReactNode } from "react";
 import { useAppwrite } from "./use.Appwrite";
-import {getUser} from "./appwrite.ts";
+import {getUser} from "./appwrite";
 
 interface User{
     $id:string;
@@ -13,30 +13,29 @@ interface GlobalContextType{
     isLoggedin:boolean;
     user:User | null;
     loading:boolean;
-    refetch:(newParams?:Record<string,string | number>) =>
-        Promise<void>;
-
+    refetch:()=>void;
 }
-const GlobalContext = createContext<GlobalContextType | undefined>
 
-export const GlobalProvider = ({children}:{children:ReactNode}) =>{
-    const {
-        data:user,
-        loading,
-        refetch
-      }  = useAppwrite({fn,params,skip}:{
-        fn:getUser,
-      });
-      const isLoggedin = !!user;
+const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
+interface GlobalProviderProps{
+    children:ReactNode;
+}
 
-        
-    
+export const GlobalProvider = ({children}:GlobalProviderProps) =>{
+    const {data:User,loading,refetch}  = useAppwrite({fn:getUser});
+    const isLoggedin = !!User;
+
     return (
-        <GlobalContext.Provider value={{isLoggedin,user,loading,refetch}}>
-            {children}
+        <GlobalContext.Provider value={{isLoggedin,User,loading,refetch}}>
+                {children}
         </GlobalContext.Provider>
     )
+
 }
 export const useGlobalContext = ():GlobalContextType =>{
     const context = useContext(GlobalContext);
+    if(!context) throw new Error('useGlobalContext must be added with global Provider');
+    return context;
 }
+
+export default GlobalProvider;
