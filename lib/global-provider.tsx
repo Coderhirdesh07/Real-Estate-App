@@ -1,5 +1,5 @@
 import { createContext, useContext ,ReactNode } from "react";
-import { useAppwrite } from "./use.Appwrite";
+import { useAppwrite } from "./useAppwrite";
 import {getUser} from "./appwrite";
 
 interface User{
